@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון משולש נומרולוגי</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0e6ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 300px;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        #result {
+            margin-top: 20px;
+            position: relative;
+            width: 300px;
+            height: 260px;
+        }
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-bottom: 260px solid #d9b3ff;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .triangle-text {
+            position: absolute;
+            font-weight: bold;
+            text-align: center;
+            width: 100px;
+            font-size: 14px;
+        }
+        .center {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .top {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .bottom-left {
+            bottom: 10px;
+            left: 25px;
+        }
+        .bottom-right {
+            bottom: 10px;
+            right: 25px;
+        }
+        .highlight {
+            background-color: yellow;
+            padding: 2px 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>מחשבון משולש נומרולוגי</h2>
+        <input type="text" id="name" placeholder="שם מלא" required>
+        <input type="date" id="birthdate" required>
+        <button onclick="calculateNumerology()">חשב</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const gematriaMap = {
+            'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9,
+            'י': 1, 'כ': 2, 'ל': 3, 'מ': 4, 'נ': 5, 'ס': 6, 'ע': 7, 'פ': 8, 'צ': 9,
+            'ק': 1, 'ר': 2, 'ש': 3, 'ת': 4, 'ך': 2, 'ם': 4, 'ן': 5, 'ף': 8, 'ץ': 9
+        };
+
+        function calculateNumerology() {
+            const name = document.getElementById('name').value;
+            const birthdate = document.getElementById('birthdate').value;
+            
+            const birthDay = calculateBirthDay(birthdate);
+            const destiny = calculateDestiny(birthdate);
+            const nameNumber = calculateName(name);
+
+            displayResult(name, birthDay, destiny, nameNumber);
+        }
+
+        function calculateBirthDay(date) {
+            const day = new Date(date).getDate();
+            return reduceNumber(day);
+        }
+
+        function calculateDestiny(date) {
+            const numbers = date.replace(/\D/g, '').split('').map(Number);
+            return reduceNumber(numbers.reduce((a, b) => a + b, 0));
+        }
+
+        function calculateName(name) {
+            let sum = 0;
+            for (let char of name) {
+                if (char in gematriaMap) {
+                    sum += gematriaMap[char];
+                }
+            }
+            return reduceNumber(sum);
+        }
+
+        function reduceNumber(num) {
+            let steps = [num];
+            while (num > 9) {
+                if (num === 11 || num === 22 || num === 33) {
+                    steps.push(num);
+                }
+                num = String(num).split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+                steps.push(num);
+            }
+            return steps;
+        }
+
+        function displayResult(name, birthDay, destiny, nameNumber) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <div class="triangle"></div>
+                <div class="triangle-text center">${name}</div>
+                <div class="triangle-text top">${formatSteps(destiny)}</div>
+                <div class="triangle-text bottom-left">${formatSteps(birthDay)}</div>
+                <div class="triangle-text bottom-right">${formatSteps(nameNumber)}</div>
+            `;
+        }
+
+        function formatSteps(steps) {
+            return steps.map((step, index) => {
+                if (index === steps.length - 1) {
+                    return step;
+                }
+                if ([11, 22, 33].includes(step)) {
+                    return `<span class="highlight">${step}</span>`;
+                }
+                return step;
+            }).join(' > ');
+        }
+    </script>
+</body>
+</html>
